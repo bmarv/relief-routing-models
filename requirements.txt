@@ -1,0 +1,6 @@
+folium==0.14.0
+ipykernel==6.23.1
+openrouteservice==2.3.3
+pandas==2.0.2
+python-dotenv==1.0.0
+requests==2.31.0
