@@ -49,7 +49,6 @@ def get_from_request(
     else:
         print('mode not supported')
 
-    print(f'request url: {request_url}')
     r = requests.get(request_url)
     if json_ize:
         return r.json()
