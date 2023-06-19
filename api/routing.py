@@ -94,6 +94,55 @@ def get_geocode_request(query:str) -> dict:
     return r
 
 # routing using openrouteservice-py as one level of indirection
-def get_direction_ors_py(params_dict, coordinates) -> dict: pass
+def get_client_ors() -> ors.Client:
+    env_vals = dotenv_values(".env")
+    ors_api_key = env_vals['ORS_API_KEY']
+    client = ors.Client(
+        key= ors_api_key
+    )
+    return client
 
-def get_matrix_ors_py(params_dict, coordinates) -> dict: pass
+def get_directions_ors_py(
+    start_coords: list, 
+    end_coords: list,
+    profile: str = 'driving-car',
+    client: ors.Client = None,
+) -> dict: 
+    '''
+    calculates route using the module openrouteservice-py as a level of indirection;
+    requires the parameters `start_coords` and `end_coords` as a list of floats of 
+    each pairs of longitudes and latitudes, if client is not overloaded, a new client 
+    element gets instanciated
+    '''
+    if client is None:
+        client = get_client_ors()
+    route = client.directions(
+        coordinates = [start_coords, end_coords],
+        profile = profile,
+        format = 'geojson',
+        validate = False
+    )
+    return route
+
+def get_matrix_ors_py(
+    coordinates_list: list,
+    metrics: list = ['distance', 'duration'],
+    profile: str = 'driving-car',
+    client: ors.Client = None
+) -> dict: 
+    '''
+    calculates the distance matrix between given points enumerated in `coordinates_list`,
+    each listed as a list of floats of logitudes and latitudes. if client is not overloaded, 
+    a new client element gets instanciated.
+    The returned `matrix` dictionary includes the `metrics` 'distance' or 'duration', if specified
+    as a parameter
+    '''
+    if client is None:
+        client = get_client_ors()
+    matrix = client.distance_matrix(
+        locations=coordinates_list,
+        profile=profile,
+        metrics=metrics,
+        validate=False,
+    )
+    return matrix
