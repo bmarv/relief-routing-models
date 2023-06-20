@@ -67,3 +67,15 @@ def preprocess_coordinates(
         reversed_el = list(reversed(co_el))
         reversed_coords.append(reversed_el)
     return reversed_coords
+
+
+def add_marker_to_map(
+    map_object,
+    coordinates,
+    text
+):
+    folium.Marker(
+        location=list(reversed(coordinates)), 
+        popup=folium.Popup("ID: {}".format(text))
+    ).add_to(map_object)
+    return map_object

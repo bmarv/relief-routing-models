@@ -92,7 +92,7 @@ def get_geocode_request(query:str) -> dict:
     )
     return r
 
-# routing using openrouteservice-py as one level of indirection
+# --- routing using openrouteservice-py as one level of indirection --- #
 def get_client_ors() -> ors.Client:
     env_vals = dotenv_values(".env")
     ors_api_key = env_vals['ORS_API_KEY']
