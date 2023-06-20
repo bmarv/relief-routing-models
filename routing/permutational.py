@@ -1,7 +1,5 @@
 import itertools
-import pandas as pd
 
-from api import carthography, routing
 from routing import directional
 
 def get_permutations(
@@ -28,6 +26,7 @@ def route_permutational_with_ors(
     indices: list,
     profile: str = 'driving-hgv'
 ):
+    # TODO: agnostic client usage, if not overloaded
     coordinates_permuted, indices_permuted = get_permutations(
         coordinates= coordinates,
         indices= indices

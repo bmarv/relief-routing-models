@@ -39,6 +39,7 @@ def route_directional_as_round_trip(
 ):         
     route_list = []
     route_summary_list = []
+    # TODO: agnostic client usage if not available yet
     client = routing.get_client_ors()
     for step_index in range (1, len(indices)):
         print(f'\tnode {indices[step_index-1]}: {coordinates[step_index-1]} \t| node {indices[step_index]}: {coordinates[step_index]}')
