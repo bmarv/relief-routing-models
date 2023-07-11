@@ -36,6 +36,7 @@ def print_route_and_costs(distance_matrix, routes):
             print(f"Node {node}", end=" -> ")
         print("[0], Cost:", cost)
 
+#--- MinSum
 
 def minsum_insertion_algorithm(distance_matrix, demands, vehicle_capacity, num_vehicles):
     '''
@@ -85,7 +86,7 @@ def minsum_insertion_algorithm(distance_matrix, demands, vehicle_capacity, num_v
     return routes
 
 
-def minsum_insertion_algorithm_feasibility(distance_matrix: np.array, demands: np.array, vehicle_capacity: int, num_vehicles: int, infeasible_nodes: dict):
+def minsum_insertion_algorithm_feasibilities(distance_matrix: np.array, demands: np.array, vehicle_capacity: int, num_vehicles: int, infeasible_nodes: dict):
     '''
     distance_matrix: np.array 2d
     demands: list 1d
@@ -263,3 +264,246 @@ def minsum_insertion_algorithm_feasibilities_deadlines(distance_matrix, demands,
         costs[best_vehicle].append(best_cost)
 
     return routes, costs
+
+# --- MinMax
+def calculate_minmax_distance(distance_matrix, from_node, to_node):
+    """
+    Calculates the distance between two nodes based on the given distance matrix.
+    """
+    return distance_matrix[from_node][to_node]
+
+
+def calculate_minmax_route_cost(distance_matrix, route):
+    """
+    Calculates the cost of a route based on the given distance matrix.
+    """
+    cost = 0
+    for i in range(len(route) - 1):
+        from_node = route[i]
+        to_node = route[i + 1]
+        cost += calculate_minmax_distance(distance_matrix, from_node, to_node)
+    return cost
+
+
+def calculate_minmax_insertion_cost(distance_matrix, route, position, node):
+    """
+    Calculates the insertion cost of inserting a node into a route at a specific position
+    based on the given distance matrix.
+    """
+    if position == 0:
+        from_node = 0
+        to_node = route[position] if len(route) > 0 else 0
+    else:
+        from_node = route[position - 1]
+        to_node = route[position] if position < len(route) else 0  # The depot node (node 0)
+    insertion_cost = calculate_minmax_distance(distance_matrix, from_node, node) + calculate_minmax_distance(distance_matrix, node, to_node)
+    return insertion_cost - calculate_minmax_distance(distance_matrix, from_node, to_node)
+
+
+def minmax_insertion_algorithm(distance_matrix, demands, vehicle_capacity, num_vehicles):
+    '''
+    distance_matrix: np.array 2d
+    demands: list 1d
+    vehicle_capacity: int
+    num_vehicles: int
+    '''
+    num_nodes = len(distance_matrix)
+    num_routes = min(num_vehicles, num_nodes - 1)  # Excluding the depot (node 0)
+
+    # Initialize the routes and their current loads
+    routes = [[] for _ in range(num_routes)]
+    loads = [0] * num_routes
+
+    # Sort the nodes based on their demands (higher demands are prioritized)
+    sorted_nodes = sorted(range(1, num_nodes), key=lambda x: -demands[x])
+
+    for node in sorted_nodes:
+        best_cost = float('inf')
+        best_vehicle = -1
+        best_position = -1
+
+        # Iterate over all vehicles
+        for vehicle in range(num_routes):
+            # Check if the current node can be assigned to the current vehicle
+            if loads[vehicle] + demands[node] <= vehicle_capacity:
+                # Iterate over all possible positions in the vehicle's route
+                for position in range(len(routes[vehicle]) + 1):
+                    # Calculate the cost of inserting the node at the position
+                    insertion_cost = calculate_minmax_insertion_cost(distance_matrix, routes[vehicle], position, node)
+
+                    # Update the best cost, vehicle, and position if the cost is lower
+                    if insertion_cost < best_cost:
+                        best_cost = insertion_cost
+                        best_vehicle = vehicle
+                        best_position = position
+
+        # Insert the node into the best vehicle and position
+        routes[best_vehicle].insert(best_position, node)
+        loads[best_vehicle] += demands[node]
+
+    return routes
+
+def minmax_insertion_algorithm_feasibilities(distance_matrix, demands, vehicle_capacity, num_vehicles, infeasible_nodes):
+    '''
+    distance_matrix: np.array 2d
+    demands: list 1d
+    vehicle_capacity: int
+    num_vehicles: int
+    infeasible_nodes: dict(key: node int, value: list of nodes as int)
+    '''
+    num_nodes = len(distance_matrix)
+    num_routes = min(num_vehicles, num_nodes - 1)  # Excluding the depot (node 0)
+
+    # Initialize the routes and their current loads
+    routes = [[] for _ in range(num_routes)]
+    loads = [0] * num_routes
+
+    # Sort the nodes based on their demands (higher demands are prioritized)
+    sorted_nodes = sorted(range(1, num_nodes), key=lambda x: -demands[x])
+
+    for node in sorted_nodes:
+        best_cost = float('inf')
+        best_vehicle = -1
+        best_position = -1
+
+        # Iterate over all vehicles
+        for vehicle in range(num_routes):
+            # Skip the current vehicle if the node is infeasible for it
+            if vehicle in infeasible_nodes and node in infeasible_nodes[vehicle]:
+                continue
+
+            # Check if the current node can be assigned to the current vehicle
+            if loads[vehicle] + demands[node] <= vehicle_capacity:
+                # Iterate over all possible positions in the vehicle's route
+                for position in range(len(routes[vehicle]) + 1):
+                    # Calculate the cost of inserting the node at the position
+                    insertion_cost = calculate_minmax_insertion_cost(distance_matrix, routes[vehicle], position, node)
+
+                    # Update the best cost, vehicle, and position if the cost is lower
+                    if insertion_cost < best_cost:
+                        best_cost = insertion_cost
+                        best_vehicle = vehicle
+                        best_position = position
+
+        # Insert the node into the best vehicle and position
+        routes[best_vehicle].insert(best_position, node)
+        loads[best_vehicle] += demands[node]
+
+    return routes
+
+
+def minmax_insertion_algorithm_deadlines(distance_matrix, demands, vehicle_capacity, num_vehicles, deadlines):
+    '''
+    distance_matrix: np.array 2d
+    demands: list 1d
+    vehicle_capacity: int
+    num_vehicles: int
+    deadlines: dict(key: node int, value: deadline int)
+    '''
+    num_nodes = len(distance_matrix)
+    num_routes = min(num_vehicles, num_nodes - 1)  # Excluding the depot (node 0)
+
+    # Initialize the routes and their current loads
+    routes = [[] for _ in range(num_routes)]
+    loads = [0] * num_routes
+
+    # Sort the nodes based on their deadlines (lower deadlines are prioritized)
+    sorted_nodes = sorted(range(1, num_nodes), key=lambda x: deadlines[x] or float('inf'))
+
+    for node in sorted_nodes:
+        best_cost = float('inf')
+        best_vehicle = -1
+        best_position = -1
+
+        # Iterate over all vehicles
+        for vehicle in range(num_routes):
+            # Check if the current node can be assigned to the current vehicle
+            if loads[vehicle] + demands[node] <= vehicle_capacity:
+                # Check if the node's deadline can be fulfilled
+                current_cost = calculate_minmax_route_cost(distance_matrix, [0] + routes[vehicle] + [0])
+                if deadlines[node] is not None and current_cost + calculate_minmax_insertion_cost(distance_matrix, routes[vehicle], len(routes[vehicle]), node) > deadlines[node]:
+                    continue
+
+                # Iterate over all possible positions in the vehicle's route
+                for position in range(len(routes[vehicle]) + 1):
+                    # Calculate the cost of inserting the node at the position
+                    insertion_cost = calculate_minmax_insertion_cost(distance_matrix, routes[vehicle], position, node)
+
+                    # Update the best cost, vehicle, and position if the cost is lower
+                    if insertion_cost < best_cost:
+                        best_cost = insertion_cost
+                        best_vehicle = vehicle
+                        best_position = position
+
+        # Insert the node into the best vehicle and position
+        routes[best_vehicle].insert(best_position, node)
+        loads[best_vehicle] += demands[node]
+
+    return routes
+
+def minmax_insertion_algorithm_feasibilities_deadlines(distance_matrix, demands, vehicle_capacity, num_vehicles, deadlines, infeasible_nodes):
+    '''
+    distance_matrix: np.array 2d
+    demands: list 1d
+    vehicle_capacity: int
+    num_vehicles: int
+    deadlines: dict(key: node int, value: deadline int)
+    infeasible_nodes: dict(key: node int, value: list of nodes as int)
+    '''
+    num_nodes = len(distance_matrix)
+    num_routes = min(num_vehicles, num_nodes - 1)  # Excluding the depot (node 0)
+
+    # Initialize the routes and their current loads
+    routes = [[] for _ in range(num_routes)]
+    loads = [0] * num_routes
+
+    # Sort the nodes based on their deadlines (lower deadlines are prioritized)
+    sorted_nodes = sorted(range(1, num_nodes), key=lambda x: deadlines.get(x, float('inf')))
+
+    for node in sorted_nodes:
+        best_cost = float('inf')
+        best_vehicle = -1
+        best_position = -1
+
+        # Check if the node is feasible for any vehicle
+        is_feasible = False
+        for vehicle in range(num_routes):
+            if vehicle in infeasible_nodes and node in infeasible_nodes[vehicle]:
+                continue
+            if loads[vehicle] + demands[node] <= vehicle_capacity:
+                is_feasible = True
+                break
+
+        if not is_feasible:
+            continue
+
+        # Iterate over all vehicles
+        for vehicle in range(num_routes):
+            # Skip the current vehicle if the node is infeasible for it
+            if vehicle in infeasible_nodes and node in infeasible_nodes[vehicle]:
+                continue
+
+            # Check if the current node can be assigned to the current vehicle
+            if loads[vehicle] + demands[node] <= vehicle_capacity:
+                # Check if the node's deadline can be fulfilled
+                current_cost = calculate_minmax_route_cost(distance_matrix, [0] + routes[vehicle] + [0])
+                deadline = deadlines.get(node, float('inf'))
+                if deadline is not None and current_cost + calculate_minmax_insertion_cost(distance_matrix, routes[vehicle], len(routes[vehicle]), node) > deadline:
+                    continue
+
+                # Iterate over all possible positions in the vehicle's route
+                for position in range(len(routes[vehicle]) + 1):
+                    # Calculate the cost of inserting the node at the position
+                    insertion_cost = calculate_minmax_insertion_cost(distance_matrix, routes[vehicle], position, node)
+
+                    # Update the best cost, vehicle, and position if the cost is lower
+                    if insertion_cost < best_cost:
+                        best_cost = insertion_cost
+                        best_vehicle = vehicle
+                        best_position = position
+
+        # Insert the node into the best vehicle and position
+        routes[best_vehicle].insert(best_position, node)
+        loads[best_vehicle] += demands[node]
+
+    return routes
