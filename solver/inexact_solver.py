@@ -37,6 +37,54 @@ def print_route_and_costs(distance_matrix, routes):
         print("[0], Cost:", cost)
 
 
+def minsum_insertion_algorithm(distance_matrix, demands, vehicle_capacity, num_vehicles):
+    '''
+    distance_matrix: np.array 2d
+    demands: list 1d
+    vehicle_capacity: int
+    num_vehicles: int
+    '''
+    num_nodes = len(distance_matrix)
+    num_routes = min(num_vehicles, num_nodes - 1)  # Excluding the depot (node 0)
+
+    # Initialize the routes and their current loads
+    routes = [[] for _ in range(num_routes)]
+    loads = [0] * num_routes
+
+    # Sort the nodes by their demand in descending order
+    sorted_nodes = sorted(range(1, num_nodes), key=lambda x: demands[x], reverse=True)
+
+    for node in sorted_nodes:
+        best_cost = float('inf')
+        best_vehicle = -1
+        best_position = -1
+
+        # Iterate over all vehicles
+        for vehicle in range(num_routes):
+            # Iterate over all possible positions in the vehicle's route
+            for position in range(len(routes[vehicle]) + 1):
+                current_load = loads[vehicle] + demands[node]
+                if current_load > vehicle_capacity:
+                    continue
+
+                # Insert the node at the position and calculate the cost
+                route = routes[vehicle].copy()
+                route.insert(position, node)
+                cost = calculate_cost(distance_matrix, [0] + route + [0])
+
+                # Update the best cost, vehicle, and position if the cost is lower
+                if cost < best_cost:
+                    best_cost = cost
+                    best_vehicle = vehicle
+                    best_position = position
+
+        # Insert the node into the best vehicle and position
+        routes[best_vehicle].insert(best_position, node)
+        loads[best_vehicle] += demands[node]
+
+    return routes
+
+
 def minsum_insertion_algorithm_feasibility(distance_matrix: np.array, demands: np.array, vehicle_capacity: int, num_vehicles: int, infeasible_nodes: dict):
     '''
     distance_matrix: np.array 2d
