@@ -2,6 +2,14 @@ import gurobipy as gp
 from gurobipy import GRB
 from typing import List
 
+
+def print_route_and_costs(distance_matrix, routes):
+    for i, route in enumerate(routes):
+        vehicle = i + 1
+        cost = sum(distance_matrix[route[k-1]][route[k]] for k in range(1, len(route)))
+        print(f"Vehicle {vehicle} - Route: {route}, Cost: {cost}")
+
+
 def solve_minmax_vrp(distance_matrix: List[List[int]], vehicle_capacity: int, num_vehicles: int) -> List[List[int]]:
     model = gp.Model("MinmaxVRP")
 
@@ -34,12 +42,6 @@ def solve_minmax_vrp(distance_matrix: List[List[int]], vehicle_capacity: int, nu
     for i, j in x.keys():
         if x[i, j].X > 0.5:  # Node i is visited by vehicle j
             routes[j].append(i)
-
-    # Print the routes and costs
-    for i, route in enumerate(routes):
-        vehicle = i + 1
-        cost = sum(distance_matrix[route[k-1]][route[k]] for k in range(1, len(route)))
-        print(f"Vehicle {vehicle} - Route: {route}, Cost: {cost}")
 
     return routes
 

@@ -36,7 +36,7 @@ def print_route_and_costs(distance_matrix, routes):
             print(f"Node {node}", end=" -> ")
         print("[0], Cost:", cost)
 
-#--- MinSum
+#--- MinSum---
 
 def minsum_insertion_algorithm(distance_matrix, demands, vehicle_capacity, num_vehicles):
     '''
@@ -265,14 +265,7 @@ def minsum_insertion_algorithm_feasibilities_deadlines(distance_matrix, demands,
 
     return routes, costs
 
-# --- MinMax
-def calculate_minmax_distance(distance_matrix, from_node, to_node):
-    """
-    Calculates the distance between two nodes based on the given distance matrix.
-    """
-    return distance_matrix[from_node][to_node]
-
-
+# --- MinMax---
 def calculate_minmax_route_cost(distance_matrix, route):
     """
     Calculates the cost of a route based on the given distance matrix.
@@ -281,7 +274,7 @@ def calculate_minmax_route_cost(distance_matrix, route):
     for i in range(len(route) - 1):
         from_node = route[i]
         to_node = route[i + 1]
-        cost += calculate_minmax_distance(distance_matrix, from_node, to_node)
+        cost += distance_matrix[from_node][to_node]
     return cost
 
 
@@ -296,8 +289,8 @@ def calculate_minmax_insertion_cost(distance_matrix, route, position, node):
     else:
         from_node = route[position - 1]
         to_node = route[position] if position < len(route) else 0  # The depot node (node 0)
-    insertion_cost = calculate_minmax_distance(distance_matrix, from_node, node) + calculate_minmax_distance(distance_matrix, node, to_node)
-    return insertion_cost - calculate_minmax_distance(distance_matrix, from_node, to_node)
+    insertion_cost = distance_matrix[from_node, node] + distance_matrix[node, to_node]
+    return insertion_cost - distance_matrix[from_node, to_node]
 
 
 def minmax_insertion_algorithm(distance_matrix, demands, vehicle_capacity, num_vehicles):

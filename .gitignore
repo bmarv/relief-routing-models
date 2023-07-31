@@ -1,5 +1,6 @@
 # environment
 .venv/
 **__pycache__
+.vscode/
 # don't share your secrets
 .env
