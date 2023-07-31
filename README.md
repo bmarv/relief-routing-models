@@ -45,14 +45,25 @@ Use the following commands to integrate a solver into your program:
 import solver.inexact_solver
 
 # pre-define hyper-parameters distance_matrix, demands, vehicle_capacity, num_vehicles, deadlines, infeasible_nodes
+
+#---
+# capacitated minsum implementation using feasibilities and deadlines
 feasibilities_deadlines = solver.inexact_solver.minsum_insertion_algorithm_feasibilities_deadlines(
     distance_matrix, demands, vehicle_capacity, num_vehicles, deadlines, infeasible_nodes
 )
 solver.inexact_solver.print_route_and_costs(distance_matrix, feasibilities_deadlines[0])
+
+#---
+# capacitated minmax implementation using feasibilities and deadlines
+minmax_feasibilities_deadlines = solver.inexact_solver.minmax_insertion_algorithm_feasibilities_deadlines(
+    distance_matrix, demands, vehicle_capacity, num_vehicles, deadlines, infeasible_nodes
+)
+solver.inexact_solver.print_route_and_costs(distance_matrix, minmax_feasibilities_deadlines)
+
 ```
 
 It is also possible to use visualization options offered in the `carthography`-module or `routing.directional.display_directional_route_round_trip_on_map(...)`.
 The visualizations are interactive and for the best used in a Jupyter-Notebook. 
-Examples are included in the Notebook `routing_demo.ipynb`
+Examples are included in the Notebook `demo.ipynb`
 
 Seismic Acitivies can also be sensed by invoking `api.seismic.get_earthquakes_within_start_and_endtime(...)`. For this external API no keys have to be gained. 
