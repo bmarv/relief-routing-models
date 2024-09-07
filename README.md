@@ -1,4 +1,8 @@
 # Relief Routing Models
+Relief Routing is a critical area of application for Vehicle Routing Problems (VRP) and the Traveling Salesperson Problem (TSP). This domain serves a crucial role in aiding people in need during natural disasters, which can potentially save lives. The research work delves into different research aspects and proposes a model implementation. It is important to note that several factors must be taken into account when considering relief routing, such as the feasibility of routing vehicles and the constraints surrounding relief efforts. The optimization of possible routes is crucial to ensure that aid is delivered quickly and efficiently and that the maximum number of people are reached in a timely manner. Therefore, it is of importance that the routing of vehicles is carefully planned and executed, taking into account all necessary factors to ensure the best possible outcome. This research project investigates methods for minimizing the sum of arrival times (MinSum) as well as the maximum arrival time (MinMax) while simultaneously considering the feasibility of the dispatch vehicles. Experiments are conducted with respect to the efficiency, equity, and scalability of the inexact and exact implementation. For improving the dispatchers’ experience another emphasis is set on solution visualizations.
+
+https://www.berlin-university-alliance.de/commitments/teaching-learning/sturop/conference/Archiv/conference-2023/programm/session-c3/c3-2/index.html 
+
 ## Project structure
 
 ```
